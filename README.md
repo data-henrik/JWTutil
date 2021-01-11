@@ -14,5 +14,7 @@ Encode or decode JSON Web Tokens (JWT)
   --token=token     | -t token     : JWT to decode
 ```
 
+Use `pip install [--user] requirements.txt` to install required package(s).
+
 ## Some fun with Db2 and JWT
 See [how I some fun setting up Db2 to accept JWT for authenticating users](Db2_JWT.md).
