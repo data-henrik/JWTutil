@@ -38,7 +38,7 @@ sudo podman exec -ti mydb2 bash -c "su - db2inst1"
 ### Key database, keys, certificates
 Next on the list is the configuration of Db2 security. It requires [creation of a keystore with GSKit](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/t_create_keystore_gskit.html) and a [Db2 token configuration file](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_config.html).
 
-The Db2 includes a copy of the [IBM Global Security Kit](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.swg.tivoli.gskit.install.doc/doc/c0055353.html). It is used to handle keystores and cryptographic tasks related to native data encryption, SSL/TLS certificates and also for the JWT (cryptographic) signatures. [JWTs can be signed and verified using either symmetric (shared key) encryption or by utilizing private / public key algorithms](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_jwt.html). In the following, I am showing how to use both.
+The Db2 includes a copy of the [IBM Global Security Kit](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.swg.tivoli.gskit.install.doc/doc/c0055353.html). It is used to handle keystores and cryptographic tasks related to native data encryption, SSL/TLS certificates and also for the JWT (cryptographic) signatures. [JWTs can be signed and verified using either symmetric (shared key) encryption or by utilizing public / private key algorithms](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_jwt.html). In the following, I am showing how to use both.
 
 While being logged in to the Db2 container (server environment), perform the following in the shell:
 1. Create the keystore for the token certification. You may want to change the password to your standards.
@@ -72,7 +72,7 @@ While being logged in to the Db2 container (server environment), perform the fol
 ### Configure Db2 for JWT
 With the above keystore and its items in place, it is time again to turn to Db2.
 
-1. Create a file sqllib/cfg/db2token.cfg with the content as shown in [db2token.cfg](db2token.cfg). The parts of the [token configuration file](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_config.html) tell Db2 where to find the keystore and how to verify received JWTs. It defines the issuer "data_henrik" and that it uses the field "name" to identify the user. Thereafter, it makes the labels for the secret key and for the RSA certificate known. Note that only one of them is required, but we are going to test both symmetric / shared key as well as the private / public key algorithms.
+1. Create a file sqllib/cfg/db2token.cfg with the content as shown in [db2token.cfg](db2token.cfg). The parts of the [token configuration file](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_config.html) tell Db2 where to find the keystore and how to verify received JWTs. It defines the issuer "data_henrik" and that it uses the field "name" to identify the user. Thereafter, it makes the labels for the secret key and for the RSA certificate known. Note that only one of them is required, but we are going to test both symmetric / shared key as well as the asymmetric public / private key algorithms.
 2. Update Db2 to enable [token-based authentication](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.config.doc/doc/r0011454.html). The configuration is set to the combination of SERVER_ENCRYPT and TOKEN.
     ```
    db2 update dbm cfg using SRVCON_AUTH SERVER_ENCRYPT_TOKEN
@@ -92,7 +92,7 @@ db2 "call sysproc.admin_refresh_config('token')"
 ## Generate JWT and login
 At this point, Db2 has been set up for JWT-based login. Now it is time for testing. But where to get the right JWT...?
 
-No panic, the Python script [JWTutil.py](JWTutil.py) is here to help. See the [README.md](README.md) for the available command options. It allows to generate signed JWTs using either HS256 (symmetric / shared key) or RS256 (private / public key) algorithms. The JWT payload is defined in [this line](JWTutil.py#L17) and you can modify it later on in sync with the Db2 configuration.
+No panic, the Python script [JWTutil.py](JWTutil.py) is here to help. See the [README.md](README.md) for the available command options. It allows to generate signed JWTs using either HS256 (symmetric / shared key) or RS256 (asymmetric public / private key) algorithms. The JWT payload is defined in [this line](JWTutil.py#L17) and you can modify it later on in sync with the Db2 configuration.
 
 Use a non-Db2 shell in your machine where you have the tool available.
 
@@ -124,7 +124,7 @@ Use a non-Db2 shell in your machine where you have the tool available.
     db2 terminate
     ```
 
-The above steps cover using the symmetric key. It is simpler, but less secure. The steps for using the private / public key algorithm are similar.
+The above steps cover using the symmetric key. It is simpler, but less secure. The steps for using the public / private key algorithm are similar.
 
 1. Copy over the file with the private key, "jwtRS256.key" from the Db2 environment.
 2. Generate the JWT:
