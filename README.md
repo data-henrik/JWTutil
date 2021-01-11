@@ -13,3 +13,6 @@ Encode or decode JSON Web Tokens (JWT)
   --secret=secret   | -s secret    : secret phrase for HS256 encoding
   --token=token     | -t token     : JWT to decode
 ```
+
+## Some fun with Db2 and JWT
+See [how I some fun setting up Db2 to accept JWT for authenticating users](Db2_JWT.md).
