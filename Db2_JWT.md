@@ -123,3 +123,17 @@ Use a non-Db2 shell in your machine where you have the tool available.
     ```
     db2 terminate
     ```
+
+The above steps cover using the symmetric key. It is simpler, but less secure. The steps for using the private / public key algorithm are similar.
+
+1. Copy over the file with the private key, "jwtRS256.key" from the Db2 environment.
+2. Generate the JWT:
+    ```
+    ./JWTutil.py -k jwtRS256.key
+    ```
+   With the output showing the token using RS256 follow the steps 3-6 from above.
+
+# Notes
+- You can use multiple issuers in db2token.cfg, each with one or more types and labels. 
+- Instead of utilizing the Python script, there are several websites like [https://jwt.io/](https://jwt.io/) which offer online encoding and decoding of JWTs.
+- The tool JWTutil.py is able to decode a JWT and print its payload. See [README.md](README.md) for details.
