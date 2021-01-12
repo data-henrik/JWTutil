@@ -68,7 +68,9 @@ def main(argv):
             # now decode it
             # - do not verify
             # - do not check for expiration
-            print("\nDecoded token payload:")
+            print("\nDecoded token header and payload:")
+            header,message_bin,signature,signing_message=instance._jws._decode_segments(token)
+            print(json.dumps(header, indent=2))
             print(json.dumps(instance.decode(token, do_verify=False, do_time_check=False), indent=2))
 
     # Now encode the message(s) to signed JWT depending on whether
