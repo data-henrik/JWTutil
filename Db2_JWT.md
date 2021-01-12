@@ -1,10 +1,11 @@
 # Using JWT with Db2
 
-Since V11.5.4, [Db2 allows to consume JWT (JSON Web Token)](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.wn.doc/doc/security_enhancements-11-5-4.html) for SSO (single sign-on). [V11.5.5 brought some usability improvements](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.wn.doc/doc/security_enhancements-11-5-5.html), e.g., support for multiple labels. It allows to specify multiple token issuers with issuer allowed to reference multiple labels in the key database.
+Since V11.5.4, [Db2 allows to consume JWT (JSON Web Token)](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.wn.doc/doc/security_enhancements-11-5-4.html). The business case is to support SSO (single sign-on). You can configure Db2 to accept access tokens issued by external Identity Provider (IDPs), including the [IBM solutions](https://www.ibm.com/security/identity-access-management) or open source projects like [gluu](https://www.gluu.org/). 
 
-The following is a short step-by-step guide on how to test this Db2 security feature with [your "own" JWTs](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_jwt.html). When done, you can have use the Db2 CLP to login as shown below:
+[V11.5.5 brought some usability improvements](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.wn.doc/doc/security_enhancements-11-5-5.html), e.g., support for multiple labels. It allows to specify multiple token issuers with issuer allowed to reference multiple labels in the key database. The following is a short step-by-step guide on how to test this Db2 security feature with [your "own" JWTs](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.admin.sec.doc/doc/c_token_jwt.html). When done, you can have use the Db2 CLP to login as shown below (and you should be ready to configure other Identity Providers as well...):
 
 ![Login to Db2 using JWT](images/Db2_JWT_Login.png)
+
 
 ## Db2 configuration
 To use Db2 with JWT, you need the right Db2 version and some changes to its security setup. Here are the necessary parts. I recommend to clone or download this repository to your machine, e.g., by:
@@ -132,6 +133,23 @@ The above steps cover using the symmetric key. It is simpler, but less secure. T
     ./JWTutil.py -k jwtRS256.key
     ```
    With the output showing the token using RS256 follow the steps 3-6 from above.
+
+For both tokens the expiration is set to one hour after they were created. Thus, if you wait or retry to connect after more than one hour, you should see an error message indicating the expiration:
+
+> SQL30082N  Security processing failed with reason "52" ("ACCESS TOKEN EXPIRED").  SQLSTATE=08001
+
+The error [SQL30082N](https://www.ibm.com/support/knowledgecenter/SSEPGG_11.5.0/com.ibm.db2.luw.messages.sql.doc/com.ibm.db2.luw.messages.sql.doc-gentopic27.html#sql30082n) has several reason codes related to access tokens.
+
+The Db2 diagnostic log has entries related to those errors, too.
+```
+EDUID   : 23                   EDUNAME: db2agent (TESTDB) 0
+FUNCTION: DB2 UDB, bsu security, sqlexVerifyJWT, probe:788
+MESSAGE : ZRC=0x805C0BDC=-2141451300=SQLEX_ACCESS_TOKEN_EXPIRED
+          "The access token has already expired."
+DATA #1 : String, 30 bytes
+JWT token has already expired.
+```
+
 
 # Notes
 - You can use multiple issuers in db2token.cfg, each with one or more types and labels. 
