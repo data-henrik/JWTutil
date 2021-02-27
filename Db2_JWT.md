@@ -46,9 +46,9 @@ While being logged in to the Db2 container (server environment), perform the fol
     ```
     gsk8capicmd_64 -keydb -create -db "jwtkeys.p12" -pw passw0rd -type pkcs12 -stash
     ```
-2. Create a file "mykey.txt" holding the secret passphrase for the shared key. I stored "mysecretkey1234567890" as secret. Thereafter, add that secret to the keystore. (Important: It will be converted to Base64 encoding.)
+2. Create a file "mykey.txt" holding the secret passphrase for the shared key. I stored "myreallysecretkey12345678901234567890" as secret. Thereafter, add that secret to the keystore. (Important: It will be converted to Base64 encoding.)
     ```
-    gsk8capicmd_64 -secretkey -add -db jwtkeys.p12 -stashed -label "mySecret" -file mykey.txt
+    gsk8capicmd_64 -secretkey -add -db jwtkeys.p12 -stashed -label "mySecretKey" -file mykey.txt
     ```
 3. Now, generate a private RSA key and store it as PEM file. You can leave the passphrase empty (just hit "ENTER").
     ```
@@ -99,12 +99,12 @@ Use a non-Db2 shell in your machine where you have the tool available.
 
 1. Base64-encode the secret key:
     ```
-    echo "mysecretkey1234567890" | base64
+    echo "myreallysecretkey12345678901234567890" | base64
     ```
-    It should report "bXlzZWNyZXRrZXkxMjM0NTY3ODkwCg==".
+    It should report "bXlyZWFsbHlzZWNyZXRrZXkxMjM0NTY3ODkwMTIzNDU2Nzg5MAo=".
 2. Generate a JWT for that key. If Python is not found use "python JWTutil.py ...":
     ```
-    ./JWTutil.py  -s bXlzZWNyZXRrZXkxMjM0NTY3ODkwCg==
+    ./JWTutil.py  -s bXlyZWFsbHlzZWNyZXRrZXkxMjM0NTY3ODkwMTIzNDU2Nzg5MAo=
     ```
     It should print a message starting with "Token using HS256:" followed by the actual token on the next line.
 3. Set an environment variable with the (full!) token from above.
